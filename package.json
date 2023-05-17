@@ -19,9 +19,7 @@
   "license": "MIT",
   "dependencies": {
     "@homebridge/plugin-ui-utils": "^0.0.19",
-    "node-fetch-cjs": "^3.2.0",
-    "node-html-parser": "^5.2.0",
-    "@microsoft/signalr": "^7.0.0"
+    "axios": "^1.4.0"
   },
   "engines": {
     "node": ">=14.0.0",
