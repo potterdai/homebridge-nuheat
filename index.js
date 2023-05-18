@@ -43,19 +43,6 @@ class NuHeatPlatform {
         await this.setupThermostats();
         this.cleanupRemovedAccessories();
         setInterval(this.refreshAccessories.bind(this), (this.config.refresh || 60) * 1000);
-        //Disconnect cleaning when homebridge is shutting down
-        process.on(
-            "SIGINT",
-            function () {
-                // this.NuHeatListener.disconnect();
-            }.bind(this)
-        );
-        process.on(
-            "SIGTERM",
-            function () {
-                // this.NuHeatListener.disconnect();
-            }.bind(this)
-        );
     }
 
     async setupThermostats() {
