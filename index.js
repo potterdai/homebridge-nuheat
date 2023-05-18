@@ -76,8 +76,8 @@ class NuHeatPlatform {
 
                     if (!deviceAccessory) {
                         this.log.info("Creating new thermostat for serial number: " + device.serialNumber);
-                        let accessory = new PlatformAccessory(thermostat.thermostat.name, uuid);
-                        accessory.addService(Service.Thermostat, thermostat.thermostat.name);
+                        let accessory = new PlatformAccessory(device.serialNumber, uuid);
+                        accessory.addService(Service.Thermostat, device.serialNumber);
                         this.api.registerPlatformAccessories("homebridge-nuheat", "NuHeat", [accessory]);
                         deviceAccessory = accessory;
                         this.accessories.push({ uuid: uuid });
