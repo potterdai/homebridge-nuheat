@@ -68,15 +68,6 @@ class NuHeatPlatform {
         await Promise.all(
             deviceArray.map((device) => {
                 if (!device.disabled) {
-                    const thermostat = new NuHeatThermostat(
-                        this.log,
-                        device.serialNumber,
-                        deviceAccessory instanceof NuHeatThermostat ? deviceAccessory.accessory : deviceAccessory,
-                        this.NuHeatAPI,
-                        Homebridge
-                    );
-                    thermostat.updateAccessory();
-
                     var uuid = UUIDGen.generate(device.serialNumber.toString());
                     let deviceAccessory = false;
                     if (this.accessories.find((accessory) => accessory.uuid === uuid)) {
@@ -90,6 +81,16 @@ class NuHeatPlatform {
                         deviceAccessory = accessory;
                         this.accessories.push({ uuid: uuid });
                     }
+
+                    const thermostat = new NuHeatThermostat(
+                        this.log,
+                        device.serialNumber,
+                        deviceAccessory instanceof NuHeatThermostat ? deviceAccessory.accessory : deviceAccessory,
+                        this.NuHeatAPI,
+                        Homebridge
+                    );
+                    thermostat.updateAccessory();
+
                     this.accessories.find((accessory) => accessory.uuid === uuid).accessory = thermostat;
                     this.accessories.find((accessory) => accessory.uuid === uuid).existsInConfig = true;
                     this.log.info("Loaded thermostat " + thermostat.thermostat.name + device.serialNumber);
