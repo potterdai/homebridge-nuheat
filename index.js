@@ -42,7 +42,7 @@ class NuHeatPlatform {
         await this.NuHeatAPI.authenticate();
         await this.setupThermostats();
         this.cleanupRemovedAccessories();
-        // setInterval(this.refreshAccessories.bind(this), (this.config.refresh || 60) * 1000);
+        setInterval(this.refreshAccessories.bind(this), (this.config.refresh || 60) * 1000);
         //Disconnect cleaning when homebridge is shutting down
         process.on(
             "SIGINT",
@@ -68,6 +68,15 @@ class NuHeatPlatform {
         await Promise.all(
             deviceArray.map((device) => {
                 if (!device.disabled) {
+                    const thermostat = new NuHeatThermostat(
+                        this.log,
+                        device.serialNumber,
+                        deviceAccessory instanceof NuHeatThermostat ? deviceAccessory.accessory : deviceAccessory,
+                        this.NuHeatAPI,
+                        Homebridge
+                    );
+                    thermostat.updateAccessory();
+
                     var uuid = UUIDGen.generate(device.serialNumber.toString());
                     let deviceAccessory = false;
                     if (this.accessories.find((accessory) => accessory.uuid === uuid)) {
@@ -75,22 +84,15 @@ class NuHeatPlatform {
                     }
                     if (!deviceAccessory) {
                         this.log.info("Creating new thermostat for serial number: " + device.serialNumber);
-                        let accessory = new PlatformAccessory(device.serialNumber, uuid);
-                        accessory.addService(Service.Thermostat, device.serialNumber);
+                        let accessory = new PlatformAccessory(thermostat.thermostat.name, uuid);
+                        accessory.addService(Service.Thermostat, thermostat.thermostat.name);
                         this.api.registerPlatformAccessories("homebridge-nuheat", "NuHeat", [accessory]);
                         deviceAccessory = accessory;
                         this.accessories.push({ uuid: uuid });
                     }
-                    this.accessories.find((accessory) => accessory.uuid === uuid).accessory = new NuHeatThermostat(
-                        this.log,
-                        device.serialNumber,
-                        deviceAccessory instanceof NuHeatThermostat ? deviceAccessory.accessory : deviceAccessory,
-                        this.NuHeatAPI,
-                        Homebridge
-                    );
+                    this.accessories.find((accessory) => accessory.uuid === uuid).accessory = thermostat;
                     this.accessories.find((accessory) => accessory.uuid === uuid).existsInConfig = true;
-                    this.log.info("Loaded thermostat " + device.serialNumber);
-                    this.accessories.find((accessory) => accessory.uuid === uuid).accessory.updateAccessory();
+                    this.log.info("Loaded thermostat " + thermostat.thermostat.name + device.serialNumber);
                 }
             })
         );
@@ -115,24 +117,19 @@ class NuHeatPlatform {
             }
         }, this);
     }
-    // refreshAccessories() {
-    //     this.refreshTheromstats();
-    // }
 
-    // async refreshTheromstats() {
-    //     this.log.debug("Trying to refresh thermostats.");
-    //     let response = await this.NuHeatAPI.refreshThermostats();
-    //     if (!response) {
-    //         this.log.error("Error getting data from NuHeatAPI in thermostat refresh");
-    //     } else {
-    //         response.forEach(function (deviceData) {
-    //             let thisAccessory = this.accessories.find(
-    //                 (accessory) => accessory.uuid === UUIDGen.generate(deviceData.serialNumber.toString())
-    //             );
-    //             if (thisAccessory) {
-    //                 thisAccessory.accessory.updateValues(deviceData);
-    //             }
-    //         }, this);
-    //     }
-    // }
+    refreshAccessories() {
+        this.refreshTheromstats();
+    }
+
+    async refreshTheromstats() {
+        this.log.debug("Trying to refresh thermostats.");
+        for (let i = 0; i < this.accessories.length; i++) {
+            let thisAccessory = this.accessories[i];
+            if (thisAccessory.accessory instanceof NuHeatThermostat) {
+                this.log.debug("Refreshing thermostat " + thisAccessory.accessory.thermostat.name);
+                await thisAccessory.accessory.updateAccessory();
+            }
+        }
+    }
 }
