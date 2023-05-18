@@ -1,6 +1,6 @@
 "use strict";
 let NuHeatAPI = require("./lib/api");
-let NuHeatThermostat = require("./lib/NuHeatThermostat.js");
+let NuHeatThermostat = require("./lib/NuHeatThermostat");
 const logger = require("./lib/logger");
 let Homebridge, PlatformAccessory, Service, Characteristic, UUIDGen;
 module.exports = function (homebridge) {
