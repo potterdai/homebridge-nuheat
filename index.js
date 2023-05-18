@@ -66,13 +66,14 @@ class NuHeatPlatform {
             );
         }
         await Promise.all(
-            deviceArray.map((device) => {
+            deviceArray.map(async (device) => {
                 if (!device.disabled) {
                     var uuid = UUIDGen.generate(device.serialNumber.toString());
                     let deviceAccessory = false;
                     if (this.accessories.find((accessory) => accessory.uuid === uuid)) {
                         deviceAccessory = this.accessories.find((accessory) => accessory.uuid === uuid).accessory;
                     }
+
                     if (!deviceAccessory) {
                         this.log.info("Creating new thermostat for serial number: " + device.serialNumber);
                         let accessory = new PlatformAccessory(thermostat.thermostat.name, uuid);
@@ -89,7 +90,7 @@ class NuHeatPlatform {
                         this.NuHeatAPI,
                         Homebridge
                     );
-                    thermostat.updateAccessory();
+                    await thermostat.updateAccessory();
 
                     this.accessories.find((accessory) => accessory.uuid === uuid).accessory = thermostat;
                     this.accessories.find((accessory) => accessory.uuid === uuid).existsInConfig = true;
