@@ -47,13 +47,13 @@ class NuHeatPlatform {
         process.on(
             "SIGINT",
             function () {
-                this.NuHeatListener.disconnect();
+                // this.NuHeatListener.disconnect();
             }.bind(this)
         );
         process.on(
             "SIGTERM",
             function () {
-                this.NuHeatListener.disconnect();
+                // this.NuHeatListener.disconnect();
             }.bind(this)
         );
     }
